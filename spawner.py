@@ -6,7 +6,14 @@ from settings import *
 class Spawner:
     def __init__(self):
         self.spawn_timer = 0
-        self.spawn_cooldown = 180
+        self.spawn_cooldown = 72
+
+    def _calculate_cooldown(self, wave_manager):
+        total = wave_manager.enemies_to_spawn
+        if total >= 30:
+            return FPS // 2 
+        else:
+            return max(1, int((15 * FPS) / total))
 
     def update(self, enemies_group, wave_manager):
         if wave_manager.in_pause:
@@ -23,4 +30,4 @@ class Spawner:
             self.spawn_timer -= 1
         else:
             enemies_group.add(Slime())
-            self.spawn_timer = self.spawn_cooldown
+            self.spawn_timer = self._calculate_cooldown(wave_manager)

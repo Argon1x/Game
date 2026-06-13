@@ -4,13 +4,16 @@ from settings import *
 from pickups import XPCristal
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, target_x, target_y, damage=None, speed=None, color=None, size=None):
+    def __init__(self, x, y, target_x, target_y, damage=None, speed=None, color=None, size=None, pierce=0):
         super().__init__()
 
         self.size = size if size else BULLET_SIZE
         self.damage = damage if damage else BULLET_DAMAGE
         self.speed = speed if speed else BULLET_SPEED
         self.color = color if color else YELLOW
+
+        self.pierce = pierce
+        self.hit_enemies = set()
 
         self.image = pygame.Surface((self.size * 2, self.size * 2), pygame.SRCALPHA)
         pygame.draw.circle(self.image, self.color, (self.size, self.size), self.size)
@@ -46,6 +49,13 @@ class Bullet(pygame.sprite.Sprite):
         if not self.alive():
             return
 
+        if not enemy.alive():
+            return
+
+        enemy_id = id(enemy)
+        if enemy_id in self.hit_enemies:
+            return
+
         bullet_cx = self.fx + self.size
         bullet_cy = self.fy + self.size
         enemy_cx = enemy.fx + enemy.size
@@ -53,9 +63,17 @@ class Bullet(pygame.sprite.Sprite):
 
         distance = math.hypot(enemy_cx - bullet_cx, enemy_cy - bullet_cy)
         if distance < self.size + enemy.size:
+            self.hit_enemies.add(enemy_id)
+
             enemy.hp -= self.damage
+            if player.vampirism > 0:
+                player.heal(self.damage * player.vampirism)
             if enemy.hp <= 0:
                 crystals_group.add(XPCristal(enemy_cx, enemy_cy))
                 wave_manager.enemy_killed()
                 enemy.kill()
-            self.kill()
+
+            if self.pierce > 0:
+                self.pierce -= 1
+            else:
+                self.kill()

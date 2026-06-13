@@ -74,5 +74,6 @@ class Slime(pygame.sprite.Sprite):
         distance = math.hypot(player.x - enemy_cx, player.y - enemy_cy)
         if distance < self.size + player.size:
             if self.attack_timer == 0:
-                player.hp -= SLIME_DAMAGE
+                damage = SLIME_DAMAGE * (1 - player.armor)
+                player.hp -= damage
                 self.attack_timer = self.attack_cooldown

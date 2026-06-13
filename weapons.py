@@ -28,11 +28,13 @@ class Knife:
                 closest = enemy
 
         if closest:
+            pierce_level = player.passive_levels.get("Piercing", 0)
             bullet = Bullet(
                 player.x, player.y,
                 closest.fx + closest.size,
                 closest.fy + closest.size,
-                self.damage * player.damage_multiplier
+                self.damage * player.damage_multiplier,
+                pierce=pierce_level
             )
             bullets_group.add(bullet)
             self.timer = self.cooldown
@@ -50,7 +52,7 @@ class MagicOrb:
         self.damage = 15
         self.radius = 50
         self.speed = 2
-        self.orb_count = 1
+        self.orb_count = 2
         self.angle = 0
         self.hit_cooldown = {}
 
@@ -79,7 +81,10 @@ class MagicOrb:
                 enemy_id = id(enemy)
 
                 if dist < 15 + enemy.size and enemy_id not in self.hit_cooldown:
-                    enemy.hp -= self.damage * player.damage_multiplier
+                    damage_dealt = self.damage * player.damage_multiplier
+                    enemy.hp -= damage_dealt
+                    if player.vampirism > 0:
+                        player.heal(damage_dealt * player.vampirism)
                     self.hit_cooldown[enemy_id] = 500
                     if enemy.hp <= 0:
                         if crystals_group is not None:
@@ -151,9 +156,12 @@ class SandSpike:
                 enemy_cy = enemy.fy + enemy.size
                 dist = math.hypot(enemy_cx - target_x, enemy_cy - target_y)
                 if dist < self.radius:
-                    enemy.hp -= self.damage * player.damage_multiplier
+                    damage_dealt = self.damage * player.damage_multiplier
+                    enemy.hp -= damage_dealt
+                    if player.vampirism > 0:
+                        player.heal(damage_dealt * player.vampirism)
                     if enemy.hp <= 0:
-                        if crystals_group:
+                        if crystals_group is not None:
                             from pickups import XPCristal
                             crystals_group.add(XPCristal(enemy_cx, enemy_cy))
                         if wave_manager:
@@ -274,9 +282,12 @@ class Boomerang:
 
                 if dist < 20 + enemy.size and enemy_id not in boomerang['hit_enemies']:
                     boomerang['hit_enemies'].add(enemy_id)
-                    enemy.hp -= self.damage * player.damage_multiplier
+                    damage_dealt = self.damage * player.damage_multiplier
+                    enemy.hp -= damage_dealt
+                    if player.vampirism > 0:
+                        player.heal(damage_dealt * player.vampirism)
                     if enemy.hp <= 0:
-                        if crystals_group:
+                        if crystals_group is not None:
                             from pickups import XPCristal
                             crystals_group.add(XPCristal(enemy_cx, enemy_cy))
                         if wave_manager:

@@ -27,13 +27,27 @@ class Player(pygame.sprite.Sprite):
         self.max_hp = PLAYER_HP
 
         self.damage_multiplier = 1.0
-        self.armor = 1.0
+        self.armor = 0.0
         self.vampirism = 0.0
-        self.regen = False
+        self.regen_rate = 0
+        self.regen_accumulator = 0.0
         self.pickup_radius = PLAYER_PICKUP_RADIUS
         self.xp_multiplier = 1.0
 
         self.weapons = [Knife()]
+
+        self.passive_levels = {
+            "Speed Boost": 0,
+            "Damage Boost": 0,
+            "Rapid Fire": 0,
+            "Piercing": 0,
+            "Max Health": 0,
+            "Vampirism": 0,
+            "Armor": 0,
+            "Regeneration": 0,
+            "Magnet": 0,
+            "XP Boost": 0,
+        }
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -60,6 +74,16 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, tick):
         self.survival_time += tick
+
+        if self.regen_rate > 0 and self.hp < self.max_hp:
+            self.regen_accumulator += self.regen_rate * (tick / 1000)
+            if self.regen_accumulator >= 1:
+                heal_amount = int(self.regen_accumulator)
+                self.heal(heal_amount)
+                self.regen_accumulator -= heal_amount
+
+    def heal(self, amount):
+        self.hp = min(self.hp + amount, self.max_hp)
 
     def update_weapons(self, enemies, bullets_group, tick, crystals_group=None, wave_manager=None):
         for weapon in self.weapons:

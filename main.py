@@ -96,7 +96,7 @@ while running:
 
     player.draw_ui(screen)
     wave_manager.draw(screen)
-    upgrade_screen.draw(screen)
+    upgrade_screen.draw(screen, player)
     game_over.draw(screen, player)
 
     pygame.display.flip()

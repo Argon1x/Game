@@ -3,7 +3,7 @@ from settings import *
 class WaveManager:
     def __init__(self):
         self.wave = 1
-        self.enemies_to_spawn = 15
+        self.enemies_to_spawn = self._enemies_for_wave(1)
         self.enemies_killed = 0
         self.wave_complete = False
         self.collect_all = False
@@ -11,6 +11,14 @@ class WaveManager:
         self.max_enemies = 30
         self.phase = 4
         self.phase_timer = 0
+
+    def _enemies_for_wave(self, wave):
+        if wave == 1:
+            return 10
+        elif wave == 2:
+            return 15
+        else:
+            return min(10 * (wave - 1), 100)
 
     def enemy_killed(self):
         self.enemies_killed += 1
@@ -49,7 +57,7 @@ class WaveManager:
     def next_wave(self):
         self.wave += 1
         self.enemies_killed = 0
-        self.enemies_to_spawn = min(10 + self.wave * 10, 100)
+        self.enemies_to_spawn = self._enemies_for_wave(self.wave)
         self.wave_complete = False
 
     def start_next_wave(self):
