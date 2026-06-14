@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
         self.max_hp = PLAYER_HP
 
         self.damage_multiplier = 1.0
-        self.armor = 0.0
+        self.armor = 1.0
         self.vampirism = 0.0
         self.regen = False
         self.bullet_pierce = False
