@@ -5,6 +5,9 @@ from asset_paths import UPGRADE_SPRITES
 from assets_loader import load_sprite
 from settings import *
 
+PASSIVE_MAX_LEVEL = 5
+WEAPON_MAX_LEVEL = 5
+
 ALL_UPGRADES = [
     {"name": "Speed Boost",  "desc": "+15% movement speed",          "type": "passive", "color": (50, 200, 100)},
     {"name": "Damage Boost", "desc": "+20% damage",                  "type": "passive", "color": (220, 80, 80)},
@@ -38,16 +41,33 @@ class UpgradeScreen:
         self.card_rects = []
         self.visible = False
 
+    WEAPON_CLASSES = {}
+
+    def _get_weapon_classes(self):
+        if not UpgradeScreen.WEAPON_CLASSES:
+            from weapons import Knife, MagicOrb, SandSpike, Boomerang
+            UpgradeScreen.WEAPON_CLASSES = {
+                "Knife": Knife,
+                "Magic Orb": MagicOrb,
+                "Sand Spike": SandSpike,
+                "Boomerang": Boomerang,
+            }
+        return UpgradeScreen.WEAPON_CLASSES
+
     def show(self, player=None):
         available = list(ALL_UPGRADES)
 
         if player:
+            weapon_classes = self._get_weapon_classes()
             filtered = []
             for card in available:
-                if card["name"] == "Magic Orb":
-                    from weapons import MagicOrb
-                    orb = next((w for w in player.weapons if isinstance(w, MagicOrb)), None)
-                    if orb and orb.level >= 6:
+                if card["type"] == "weapon":
+                    weapon_class = weapon_classes.get(card["name"])
+                    existing = next((w for w in player.weapons if isinstance(w, weapon_class)), None)
+                    if existing and existing.level >= WEAPON_MAX_LEVEL:
+                        continue
+                if card["type"] == "passive":
+                    if player.passive_levels.get(card["name"], 0) >= PASSIVE_MAX_LEVEL:
                         continue
                 filtered.append(card)
             available = filtered
@@ -55,7 +75,7 @@ class UpgradeScreen:
         self.cards = random.sample(available, min(3, len(available)))
         self.visible = True
 
-    def draw(self, screen):
+    def draw(self, screen, player=None):
         if not self.visible:
             return
 
@@ -92,6 +112,17 @@ class UpgradeScreen:
             bg_color = (60, 60, 90) if hovered else (35, 35, 55)
             border_color = card["color"] if hovered else (80, 80, 120)
 
+            current_level = 0
+            if player:
+                if card["type"] == "passive":
+                    current_level = player.passive_levels.get(card["name"], 0)
+                else:
+                    weapon_classes = self._get_weapon_classes()
+                    weapon_class = weapon_classes.get(card["name"])
+                    existing = next((w for w in player.weapons if isinstance(w, weapon_class)), None)
+                    current_level = existing.level if existing else 0
+            next_level = current_level + 1
+
             pygame.draw.rect(screen, bg_color, rect, border_radius=16)
             pygame.draw.rect(screen, border_color, rect, 3, border_radius=16)
 
@@ -114,6 +145,11 @@ class UpgradeScreen:
             name_surf = font_name.render(card["name"], True, WHITE)
             name_r = name_surf.get_rect(centerx=x + card_w // 2, top=y + 185)
             screen.blit(name_surf, name_r)
+
+            level_text = f"{current_level} -> {next_level}"
+            level_surf = font_type.render(level_text, True, (220, 220, 100))
+            level_r = level_surf.get_rect(centerx=x + card_w // 2, top=y + 215)
+            screen.blit(level_surf, level_r)
 
             words = card["desc"].split()
             lines = []
@@ -144,6 +180,8 @@ class UpgradeScreen:
 
     def apply(self, card, player):
         name = card["name"]
+        if card["type"] == "passive":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
         if name == "Speed Boost":
             player.speed *= 1.15
         elif name == "Damage Boost":

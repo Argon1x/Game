@@ -233,7 +233,7 @@ class Game:
 
         self.player.draw_ui(screen)
         self.wave_manager.draw(screen)
-        self.upgrade_screen.draw(screen)
+        self.upgrade_screen.draw(screen, self.player)
 
     def draw(self):
         if self.state == GameState.MAIN_MENU:

@@ -48,6 +48,19 @@ class Player(pygame.sprite.Sprite):
 
         self.weapons = [Knife()]
 
+        self.passive_levels = {
+            "Speed Boost": 0,
+            "Damage Boost": 0,
+            "Rapid Fire": 0,
+            "Piercing": 0,
+            "Max Health": 0,
+            "Vampirism": 0,
+            "Armor": 0,
+            "Regeneration": 0,
+            "Magnet": 0,
+            "XP Boost": 0,
+        }
+
     def handle_input(self, enabled: bool = True):
         if not enabled:
             self.animator.set_movement(0, 0, moving=False)
