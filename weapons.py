@@ -66,7 +66,7 @@ class MagicOrb:
         self.damage = 11
         self.radius = WEAPON_ORB_RADIUS
         self.speed = 2
-        self.orb_count = 1
+        self.orb_count = 2
         self.angle = 0
         self.hit_cooldown = {}
 

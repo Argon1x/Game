@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
         self.max_hp = PLAYER_HP
 
         self.damage_multiplier = 1.0
-        self.armor = 1.0
+        self.armor = 0.0
         self.vampirism = 0.0
         self.regen = False
         self.bullet_pierce = False
@@ -108,6 +108,16 @@ class Player(pygame.sprite.Sprite):
         self.animator.update(tick)
         self.image = self.animator.image
         self.rect = self.image.get_rect(center=center)
+
+        if self.regen_rate > 0 and self.hp < self.max_hp:
+            self.regen_accumulator += self.regen_rate * (tick / 1000)
+            if self.regen_accumulator >= 1:
+                heal_amount = int(self.regen_accumulator)
+                self.heal(heal_amount)
+                self.regen_accumulator -= heal_amount
+
+    def heal(self, amount):
+        self.hp = min(self.hp + amount, self.max_hp)
 
     def update_weapons(self, enemies, bullets_group, tick, crystals_group=None, wave_manager=None):
         for weapon in self.weapons:

@@ -17,6 +17,14 @@ class WaveManager:
         self.phase = 4
         self.phase_timer = 0
 
+    def _enemies_for_wave(self, wave):
+        if wave == 1:
+            return 10
+        elif wave == 2:
+            return 15
+        else:
+            return min(10 * (wave - 1), 100)
+
     def enemy_killed(self):
         self.enemies_killed += 1
         if self.enemies_killed >= self.enemies_to_spawn:

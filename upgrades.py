@@ -18,7 +18,7 @@ ALL_UPGRADES = [
     {"name": "Armor",        "desc": "-10% damage taken (max 50%)",  "type": "passive", "color": (100, 150, 220)},
     {"name": "Regeneration", "desc": "Slow HP regen",                "type": "passive", "color": (50, 220, 150)},
     {"name": "Magnet",       "desc": "+50% pickup radius",           "type": "passive", "color": (220, 150, 50)},
-    {"name": "XP Boost",     "desc": "+50% XP gained",              "type": "passive", "color": (100, 220, 220)},
+    {"name": "XP Boost",     "desc": "+50% XP gained",               "type": "passive", "color": (100, 220, 220)},
     {"name": "Knife",        "desc": "Throws knife at nearest enemy","type": "weapon",  "color": (180, 180, 180)},
     {"name": "Magic Orb",    "desc": "Orbs orbit around you",        "type": "weapon",  "color": (100, 150, 255)},
     {"name": "Sand Spike",   "desc": "Spikes burst under enemies",   "type": "weapon",  "color": (200, 150, 50)},
@@ -193,14 +193,14 @@ class UpgradeScreen:
         elif name == "Piercing":
             player.bullet_pierce = True
         elif name == "Max Health":
-            player.max_hp += 25
-            player.hp = min(player.hp + 25, player.max_hp)
+            player.max_hp += 20
+            player.hp = min(player.hp + 20, player.max_hp)
         elif name == "Vampirism":
             player.vampirism = min(VAMPIRISM_CAP, player.vampirism + VAMPIRISM_PER_CARD)
         elif name == "Armor":
             player.armor = max(ARMOR_DAMAGE_MIN, player.armor * ARMOR_PER_CARD)
         elif name == "Regeneration":
-            player.regen = True
+            player.regen_rate += 1
         elif name == "Magnet":
             player.pickup_radius *= 1.5
         elif name == "XP Boost":
