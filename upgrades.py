@@ -1,5 +1,8 @@
 import pygame
 import random
+
+from asset_paths import UPGRADE_SPRITES
+from assets_loader import load_sprite
 from settings import *
 
 ALL_UPGRADES = [
@@ -8,8 +11,8 @@ ALL_UPGRADES = [
     {"name": "Rapid Fire",   "desc": "+15% fire rate",               "type": "passive", "color": (220, 180, 50)},
     {"name": "Piercing",     "desc": "Bullets pierce foes",          "type": "passive", "color": (150, 100, 220)},
     {"name": "Max Health",   "desc": "+25 max HP",                   "type": "passive", "color": (220, 50, 50)},
-    {"name": "Vampirism",    "desc": "10% lifesteal",                "type": "passive", "color": (180, 30, 30)},
-    {"name": "Armor",        "desc": "-15% damage taken",            "type": "passive", "color": (100, 150, 220)},
+    {"name": "Vampirism",    "desc": "5% lifesteal (max 15%)",       "type": "passive", "color": (180, 30, 30)},
+    {"name": "Armor",        "desc": "-10% damage taken (max 50%)",  "type": "passive", "color": (100, 150, 220)},
     {"name": "Regeneration", "desc": "Slow HP regen",                "type": "passive", "color": (50, 220, 150)},
     {"name": "Magnet",       "desc": "+50% pickup radius",           "type": "passive", "color": (220, 150, 50)},
     {"name": "XP Boost",     "desc": "+50% XP gained",              "type": "passive", "color": (100, 220, 220)},
@@ -18,6 +21,16 @@ ALL_UPGRADES = [
     {"name": "Sand Spike",   "desc": "Spikes burst under enemies",   "type": "weapon",  "color": (200, 150, 50)},
     {"name": "Boomerang",    "desc": "Returns and pierces enemies",  "type": "weapon",  "color": (150, 100, 50)},
 ]
+
+_icon_cache: dict[str, pygame.Surface | None] = {}
+
+
+def _upgrade_icon(name: str) -> pygame.Surface | None:
+    if name not in _icon_cache:
+        path = UPGRADE_SPRITES.get(name)
+        _icon_cache[name] = load_sprite(path, 72) if path else None
+    return _icon_cache[name]
+
 
 class UpgradeScreen:
     def __init__(self):
@@ -88,8 +101,15 @@ class UpgradeScreen:
             screen.blit(type_surf, type_r)
 
             pygame.draw.rect(screen, card["color"], (x + 20, y + 38, card_w - 40, 3))
-            pygame.draw.circle(screen, card["color"], (x + card_w // 2, y + 130), 40)
-            pygame.draw.circle(screen, WHITE, (x + card_w // 2, y + 130), 40, 2)
+
+            icon = _upgrade_icon(card["name"])
+            icon_center = (x + card_w // 2, y + 130)
+            if icon:
+                icon_rect = icon.get_rect(center=icon_center)
+                screen.blit(icon, icon_rect)
+            else:
+                pygame.draw.circle(screen, card["color"], icon_center, 40)
+                pygame.draw.circle(screen, WHITE, icon_center, 40, 2)
 
             name_surf = font_name.render(card["name"], True, WHITE)
             name_r = name_surf.get_rect(centerx=x + card_w // 2, top=y + 185)
@@ -130,14 +150,17 @@ class UpgradeScreen:
             player.damage_multiplier *= 1.20
         elif name == "Rapid Fire":
             for weapon in player.weapons:
-                weapon.cooldown = int(weapon.cooldown * 0.85) if hasattr(weapon, 'cooldown') else None
+                if hasattr(weapon, "cooldown"):
+                    weapon.cooldown = int(weapon.cooldown * 0.85)
+        elif name == "Piercing":
+            player.bullet_pierce = True
         elif name == "Max Health":
             player.max_hp += 25
             player.hp = min(player.hp + 25, player.max_hp)
         elif name == "Vampirism":
-            player.vampirism += 0.10
+            player.vampirism = min(VAMPIRISM_CAP, player.vampirism + VAMPIRISM_PER_CARD)
         elif name == "Armor":
-            player.armor *= 0.85
+            player.armor = max(ARMOR_DAMAGE_MIN, player.armor * ARMOR_PER_CARD)
         elif name == "Regeneration":
             player.regen = True
         elif name == "Magnet":

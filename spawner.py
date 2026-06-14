@@ -1,14 +1,13 @@
-import pygame
-from enemies import Slime
-from settings import *
+from enemies import spawn_enemy
+from settings import SPAWN_COOLDOWN_MS
 
 
 class Spawner:
     def __init__(self):
         self.spawn_timer = 0
-        self.spawn_cooldown = 180
+        self.spawn_cooldown = SPAWN_COOLDOWN_MS
 
-    def update(self, enemies_group, wave_manager):
+    def update(self, enemies_group, wave_manager, player, tick=1):
         if wave_manager.in_pause:
             return
 
@@ -20,7 +19,7 @@ class Spawner:
             return
 
         if self.spawn_timer > 0:
-            self.spawn_timer -= 1
+            self.spawn_timer -= tick
         else:
-            enemies_group.add(Slime())
+            enemies_group.add(spawn_enemy(wave_manager.wave, player))
             self.spawn_timer = self.spawn_cooldown

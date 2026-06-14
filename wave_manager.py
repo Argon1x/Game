@@ -1,21 +1,25 @@
 from settings import *
 
+def enemies_for_wave(wave: int) -> int:
+    if wave == 1:
+        return WAVE_1_ENEMIES
+    return min(WAVE_ENEMIES_BASE + wave * WAVE_ENEMIES_PER_LEVEL, WAVE_ENEMIES_MAX)
+
+
 class WaveManager:
     def __init__(self):
         self.wave = 1
-        self.enemies_to_spawn = 15
+        self.enemies_to_spawn = enemies_for_wave(1)
         self.enemies_killed = 0
-        self.wave_complete = False
         self.collect_all = False
         self.in_pause = True
-        self.max_enemies = 30
+        self.max_enemies = WAVE_MAX_ON_SCREEN
         self.phase = 4
         self.phase_timer = 0
 
     def enemy_killed(self):
         self.enemies_killed += 1
         if self.enemies_killed >= self.enemies_to_spawn:
-            self.wave_complete = True
             self.phase = 1
             self.phase_timer = 0
             self.in_pause = True
@@ -49,8 +53,7 @@ class WaveManager:
     def next_wave(self):
         self.wave += 1
         self.enemies_killed = 0
-        self.enemies_to_spawn = min(10 + self.wave * 10, 100)
-        self.wave_complete = False
+        self.enemies_to_spawn = enemies_for_wave(self.wave)
 
     def start_next_wave(self):
         if self.phase == 0:
