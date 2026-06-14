@@ -180,30 +180,38 @@ class UpgradeScreen:
 
     def apply(self, card, player):
         name = card["name"]
-        if card["type"] == "passive":
-            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
         if name == "Speed Boost":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.speed *= 1.15
         elif name == "Damage Boost":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.damage_multiplier *= 1.20
         elif name == "Rapid Fire":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             for weapon in player.weapons:
                 if hasattr(weapon, "cooldown"):
                     weapon.cooldown = int(weapon.cooldown * 0.85)
         elif name == "Piercing":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.bullet_pierce = True
         elif name == "Max Health":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.max_hp += 25
             player.hp = min(player.hp + 25, player.max_hp)
         elif name == "Vampirism":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.vampirism = min(VAMPIRISM_CAP, player.vampirism + VAMPIRISM_PER_CARD)
         elif name == "Armor":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.armor = max(ARMOR_DAMAGE_MIN, player.armor * ARMOR_PER_CARD)
         elif name == "Regeneration":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.regen = True
         elif name == "Magnet":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.pickup_radius *= 1.5
         elif name == "XP Boost":
+            player.passive_levels[name] = player.passive_levels.get(name, 0) + 1
             player.xp_multiplier *= 1.5
         elif name == "Knife":
             from weapons import Knife

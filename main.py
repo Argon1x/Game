@@ -168,7 +168,7 @@ class Game:
 
         self.wave_manager.update(tick)
 
-        if self.wave_manager.phase == 3 and not self.upgrade_screen.visible:
+        if self.wave_manager.phase == 3 and not self.upgrade_screen.visible and not self.player.level_up_pending:
             self.upgrade_screen.show(self.player)
 
         if self.player.level_up_pending and not self.upgrade_screen.visible:
