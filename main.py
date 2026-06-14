@@ -168,7 +168,7 @@ class Game:
 
         self.wave_manager.update(tick)
 
-        if self.wave_manager.phase == 3 and not self.upgrade_screen.visible and not self.player.level_up_pending:
+        if self.wave_manager.phase == 3 and not self.upgrade_screen.visible:
             self.upgrade_screen.show(self.player)
 
         if self.player.level_up_pending and not self.upgrade_screen.visible:
@@ -192,7 +192,7 @@ class Game:
         for enemy in self.enemies_group:
             enemy.update(self.player, tick)
             enemy.separate(self.enemies_group)
-            enemy.check_collision_with_player(self.player, tick)
+            enemy.check_collision_with_player(self.player)
 
         self.player.update_weapons(
             self.enemies_group,
@@ -233,7 +233,7 @@ class Game:
 
         self.player.draw_ui(screen)
         self.wave_manager.draw(screen)
-        self.upgrade_screen.draw(screen, self.player)
+        self.upgrade_screen.draw(screen)
 
     def draw(self):
         if self.state == GameState.MAIN_MENU:

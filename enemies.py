@@ -135,8 +135,8 @@ class Enemy(pygame.sprite.Sprite):
             self.contact_damage = max(1, int(self.contact_damage * PLAYER_EASE_DAMAGE))
         self.attack_timer = 0
         self.attack_cooldown = max(
-            ENEMY_ATTACK_COOLDOWN_MIN_MS,
-            int((ENEMY_ATTACK_COOLDOWN_BASE - (wave - 1)) * 1000 / FPS),
+            ENEMY_ATTACK_COOLDOWN_MIN,
+            ENEMY_ATTACK_COOLDOWN_BASE - (wave - 1),
         )
         self._move_dx = 0.0
         self._move_dy = 0.0
@@ -258,13 +258,13 @@ class Enemy(pygame.sprite.Sprite):
                 self.fx += dx * push
                 self.fy += dy * push
 
-    def check_collision_with_player(self, player, tick=16):
+    def check_collision_with_player(self, player):
         if self.attack_timer > 0:
-            self.attack_timer = max(0, self.attack_timer - tick)
+            self.attack_timer -= 1
 
         distance = math.hypot(player.x - self.center_x, player.y - self.center_y)
         if distance < self._contact_range(player):
-            if self.attack_timer <= 0:
+            if self.attack_timer == 0:
                 armor_mult = max(ARMOR_DAMAGE_MIN, player.armor)
                 damage = max(1, int(self.contact_damage * armor_mult))
                 player.hp -= damage

@@ -129,7 +129,6 @@ class Bullet(pygame.sprite.Sprite):
         self.damage = damage if damage else BULLET_DAMAGE
         self.speed = speed if speed else BULLET_SPEED
         self.color = color if color else YELLOW
-        self.hit_enemies: set[int] = set()
 
         dx = target_x - x
         dy = target_y - y
@@ -171,10 +170,6 @@ class Bullet(pygame.sprite.Sprite):
         if not self.alive() or not enemy.alive():
             return
 
-        enemy_id = id(enemy)
-        if enemy_id in self.hit_enemies:
-            return
-
         bullet_cx = self.fx
         bullet_cy = self.fy
         enemy_cx = enemy.center_x
@@ -182,7 +177,6 @@ class Bullet(pygame.sprite.Sprite):
 
         distance = math.hypot(enemy_cx - bullet_cx, enemy_cy - bullet_cy)
         if distance < self.size + enemy.size:
-            self.hit_enemies.add(enemy_id)
             enemy.take_damage(self.damage, player, crystals_group, wave_manager)
             if not player.bullet_pierce:
                 self.kill()
