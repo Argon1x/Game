@@ -192,7 +192,7 @@ class Game:
         for enemy in self.enemies_group:
             enemy.update(self.player, tick)
             enemy.separate(self.enemies_group)
-            enemy.check_collision_with_player(self.player)
+            enemy.check_collision_with_player(self.player, tick)
 
         self.player.update_weapons(
             self.enemies_group,

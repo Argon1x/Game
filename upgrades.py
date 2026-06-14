@@ -193,14 +193,14 @@ class UpgradeScreen:
         elif name == "Piercing":
             player.bullet_pierce = True
         elif name == "Max Health":
-            player.max_hp += 20
-            player.hp = min(player.hp + 20, player.max_hp)
+            player.max_hp += 25
+            player.hp = min(player.hp + 25, player.max_hp)
         elif name == "Vampirism":
             player.vampirism = min(VAMPIRISM_CAP, player.vampirism + VAMPIRISM_PER_CARD)
         elif name == "Armor":
             player.armor = max(ARMOR_DAMAGE_MIN, player.armor * ARMOR_PER_CARD)
         elif name == "Regeneration":
-            player.regen_rate += 1
+            player.regen = True
         elif name == "Magnet":
             player.pickup_radius *= 1.5
         elif name == "XP Boost":
