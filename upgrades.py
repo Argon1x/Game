@@ -7,7 +7,7 @@ from settings import *
 
 ALL_UPGRADES = [
     {"name": "Speed Boost",  "desc": "+15% movement speed",          "type": "passive", "color": (50, 200, 100)},
-    {"name": "Damage Boost", "desc": "+20% damage",                  "type": "passive", "color": (220, 80, 80)},
+    {"name": "Damage Boost", "desc": "+10% damage",                  "type": "passive", "color": (220, 80, 80)},
     {"name": "Rapid Fire",   "desc": "+15% fire rate",               "type": "passive", "color": (220, 180, 50)},
     {"name": "Piercing",     "desc": "Bullets pierce foes",          "type": "passive", "color": (150, 100, 220)},
     {"name": "Max Health",   "desc": "+25 max HP",                   "type": "passive", "color": (220, 50, 50)},
@@ -15,7 +15,7 @@ ALL_UPGRADES = [
     {"name": "Armor",        "desc": "-10% damage taken (max 50%)",  "type": "passive", "color": (100, 150, 220)},
     {"name": "Regeneration", "desc": "Slow HP regen",                "type": "passive", "color": (50, 220, 150)},
     {"name": "Magnet",       "desc": "+50% pickup radius",           "type": "passive", "color": (220, 150, 50)},
-    {"name": "XP Boost",     "desc": "+50% XP gained",              "type": "passive", "color": (100, 220, 220)},
+    {"name": "XP Boost",     "desc": "+30% XP gained (max 5)",       "type": "passive", "color": (100, 220, 220)},
     {"name": "Knife",        "desc": "Throws knife at nearest enemy","type": "weapon",  "color": (180, 180, 180)},
     {"name": "Magic Orb",    "desc": "Orbs orbit around you",        "type": "weapon",  "color": (100, 150, 255)},
     {"name": "Sand Spike",   "desc": "Spikes burst under enemies",   "type": "weapon",  "color": (200, 150, 50)},
@@ -42,13 +42,23 @@ class UpgradeScreen:
         available = list(ALL_UPGRADES)
 
         if player:
+            from weapons import MagicOrb
             filtered = []
             for card in available:
                 if card["name"] == "Magic Orb":
-                    from weapons import MagicOrb
                     orb = next((w for w in player.weapons if isinstance(w, MagicOrb)), None)
                     if orb and orb.level >= 6:
                         continue
+                if card["name"] == "Piercing" and player.bullet_pierce >= 5:
+                    continue
+                if card["name"] == "Vampirism" and player.vampirism >= VAMPIRISM_CAP:
+                    continue
+                if card["name"] == "Armor" and player.armor <= ARMOR_DAMAGE_MIN:
+                    continue
+                if card["name"] == "Regeneration" and player.regen >= 5:
+                    continue
+                if card["name"] == "XP Boost" and player.xp_boost >= 5:
+                    continue
                 filtered.append(card)
             available = filtered
 
@@ -147,13 +157,13 @@ class UpgradeScreen:
         if name == "Speed Boost":
             player.speed *= 1.15
         elif name == "Damage Boost":
-            player.damage_multiplier *= 1.20
+            player.damage_multiplier *= 1.10
         elif name == "Rapid Fire":
             for weapon in player.weapons:
                 if hasattr(weapon, "cooldown"):
                     weapon.cooldown = int(weapon.cooldown * 0.85)
         elif name == "Piercing":
-            player.bullet_pierce = True
+            player.bullet_pierce = min(5, player.bullet_pierce + 1)
         elif name == "Max Health":
             player.max_hp += 25
             player.hp = min(player.hp + 25, player.max_hp)
@@ -162,11 +172,12 @@ class UpgradeScreen:
         elif name == "Armor":
             player.armor = max(ARMOR_DAMAGE_MIN, player.armor * ARMOR_PER_CARD)
         elif name == "Regeneration":
-            player.regen = True
+            player.regen = min(5, player.regen + 1)
         elif name == "Magnet":
             player.pickup_radius *= 1.5
         elif name == "XP Boost":
-            player.xp_multiplier *= 1.5
+            player.xp_multiplier *= 1.3
+            player.xp_boost += 1
         elif name == "Knife":
             from weapons import Knife
             if not any(isinstance(w, Knife) for w in player.weapons):

@@ -1,8 +1,8 @@
 import pygame
 import math
 
-from asset_paths import PROJECTILE_SPRITES
-from assets_loader import load_sprite
+from asset_paths import PROJECTILE_SPRITES, SOUNDS
+from assets_loader import load_sprite, load_sound
 from settings import *
 from projectiles import Bullet
 
@@ -20,9 +20,10 @@ def _weapon_sprite(kind: str, size: int) -> pygame.Surface | None:
 class Knife:
     def __init__(self):
         self.level = 1
-        self.damage = 7
+        self.damage = 8
         self.cooldown = 1700
         self.timer = 0
+        self._sound = load_sound(SOUNDS["knife_shoot"], volume=0.4)
 
     def update(self, player, enemies, bullets_group, tick, crystals_group=None, wave_manager=None):
         if self.timer > 0:
@@ -52,6 +53,8 @@ class Knife:
             )
             bullets_group.add(bullet)
             self.timer = self.cooldown
+            if self._sound:
+                self._sound.play()
 
     def level_up(self):
         self.level += 1
@@ -221,7 +224,7 @@ class SandSpike:
 class Boomerang:
     def __init__(self):
         self.level = 1
-        self.damage = 20
+        self.damage = 10
         self.cooldown = 2500
         self.timer = 0
         self.boomerang_count = 1
@@ -342,6 +345,6 @@ class Boomerang:
 
     def level_up(self):
         self.level += 1
-        self.damage += 8
+        self.damage += 5
         self.cooldown = max(1000, self.cooldown - 200)
         self.boomerang_count += 1

@@ -2,6 +2,8 @@ from pathlib import Path
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 
+SOUNDS_DIR = ASSETS_DIR / "sounds"
+
 WORLD_DIR = ASSETS_DIR / "world"
 UI_DIR = ASSETS_DIR / "ui"
 PLAYER_DIR = ASSETS_DIR / "player"
@@ -26,6 +28,17 @@ PROJECTILE_SPRITES = {
     "orb": PROJECTILES_DIR / "orb.png",
     "spike": PROJECTILES_DIR / "spike.png",
     "boomerang": PROJECTILES_DIR / "boomerang.png",
+}
+
+SOUNDS = {
+    "knife_shoot": SOUNDS_DIR / "knife_swoosh.wav",
+    "enemy_hit":   SOUNDS_DIR / "enemy_hit.wav",
+    "enemy_death": SOUNDS_DIR / "death_sound.wav",
+    "pickup":      SOUNDS_DIR / "pick_up.ogg",
+    "levelup":     SOUNDS_DIR / "levelup.wav",
+    "player_hurt": SOUNDS_DIR / "get_hurt.wav",
+    "music":       SOUNDS_DIR / "desert_wasteland.ogg",
+    "click":       SOUNDS_DIR / "click.ogg",
 }
 
 UPGRADE_SPRITES = {

@@ -1,6 +1,16 @@
 import pygame
 
 from settings import YELLOW, SAND
+from asset_paths import SOUNDS
+from assets_loader import load_sound
+
+_click_sound = None
+
+def _get_click_sound():
+    global _click_sound
+    if _click_sound is None:
+        _click_sound = load_sound(SOUNDS["click"], volume=0.3)
+    return _click_sound
 
 BTN_FILL = (72, 52, 34, 150)
 BTN_HOVER = (105, 78, 48, 185)
@@ -86,9 +96,15 @@ class Button:
 
     def handle_click(self, pos: tuple[int, int]) -> bool:
         if self.rect.collidepoint(pos):
+            sound = _get_click_sound()
+            if sound:
+                sound.play()
             self.callback()
             return True
         return False
 
     def activate(self) -> None:
+        sound = _get_click_sound()
+        if sound:
+            sound.play()
         self.callback()

@@ -10,9 +10,33 @@ from asset_paths import (
     SCORPION_FRAMES_DIR,
     SLIME_FRAMES_DIR,
     WORM_FRAMES_DIR,
+    SOUNDS,
 )
+from assets_loader import load_sound
 from settings import *
 from sprite_anim import AnimatedCharacter
+
+_enemy_hit_sound = None
+_enemy_death_sound = None
+_player_hurt_sound = None
+
+def _get_hit_sound():
+    global _enemy_hit_sound
+    if _enemy_hit_sound is None:
+        _enemy_hit_sound = load_sound(SOUNDS["enemy_hit"], volume=0.4)
+    return _enemy_hit_sound
+
+def _get_death_sound():
+    global _enemy_death_sound
+    if _enemy_death_sound is None:
+        _enemy_death_sound = load_sound(SOUNDS["enemy_death"], volume=0.15)
+    return _enemy_death_sound
+
+def _get_player_hurt_sound():
+    global _player_hurt_sound
+    if _player_hurt_sound is None:
+        _player_hurt_sound = load_sound(SOUNDS["player_hurt"], volume=0.4)
+    return _player_hurt_sound
 
 
 def _fallback_sprite(size: int, color: tuple[int, int, int]) -> pygame.Surface:
@@ -23,7 +47,7 @@ def _fallback_sprite(size: int, color: tuple[int, int, int]) -> pygame.Surface:
 
 ENEMY_TYPES: dict[str, dict] = {
     "slime": {
-        "durability": SLIME_DURABILITY,
+        "hp": SLIME_HP,
         "speed": SLIME_SPEED,
         "size": SLIME_SIZE,
         "xp": SLIME_XP,
@@ -34,7 +58,7 @@ ENEMY_TYPES: dict[str, dict] = {
         "spawn_weight": 1.0,
     },
     "worm": {
-        "durability": WORM_DURABILITY,
+        "hp": WORM_HP,
         "speed": WORM_SPEED,
         "size": WORM_SIZE,
         "xp": WORM_XP,
@@ -45,7 +69,7 @@ ENEMY_TYPES: dict[str, dict] = {
         "spawn_weight": 0.85,
     },
     "bat": {
-        "durability": BAT_DURABILITY,
+        "hp": BAT_HP,
         "speed": BAT_SPEED,
         "size": BAT_SIZE,
         "xp": BAT_XP,
@@ -56,7 +80,7 @@ ENEMY_TYPES: dict[str, dict] = {
         "spawn_weight": 0.75,
     },
     "bug": {
-        "durability": BUG_DURABILITY,
+        "hp": BUG_HP,
         "speed": BUG_SPEED,
         "size": BUG_SIZE,
         "xp": BUG_XP,
@@ -67,7 +91,7 @@ ENEMY_TYPES: dict[str, dict] = {
         "spawn_weight": 0.65,
     },
     "scorpion": {
-        "durability": SCORPION_DURABILITY,
+        "hp": SCORPION_HP,
         "speed": SCORPION_SPEED,
         "size": SCORPION_SIZE,
         "xp": SCORPION_XP,
@@ -97,24 +121,6 @@ def _wave_stat_mult(wave: int, per_wave: float) -> float:
     return 1.0 + max(0, wave - 1) * per_wave
 
 
-def _estimate_hit_damage(player) -> float:
-    if player is None:
-        return 7.0
-
-    peak = 7.0
-    for weapon in player.weapons:
-        weapon_damage = getattr(weapon, "damage", 0)
-        peak = max(peak, weapon_damage * player.damage_multiplier)
-    return peak
-
-
-def _calc_enemy_hp(cfg: dict, player, wave: int) -> int:
-    durability = cfg.get("durability", 3.0)
-    hit_damage = _estimate_hit_damage(player)
-    wave_mult = _wave_stat_mult(wave, ENEMY_HP_SCALE_PER_WAVE)
-    return max(1, int(durability * hit_damage * wave_mult))
-
-
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, enemy_type: str = "slime", player=None, wave: int = 1):
         super().__init__()
@@ -125,7 +131,8 @@ class Enemy(pygame.sprite.Sprite):
         max_speed = (PLAYER_SPEED / FPS) * ENEMY_MAX_SPEED_RATIO
 
         self.speed = min(cfg["speed"], max_speed)
-        self.hp = _calc_enemy_hp(cfg, player, wave)
+        wave_mult = _wave_stat_mult(wave, ENEMY_HP_SCALE_PER_WAVE)
+        self.hp = max(1, int(cfg["hp"] * wave_mult))
         self.max_hp = self.hp
         self.size = cfg["size"]
         self.xp_value = cfg["xp"]
@@ -195,9 +202,15 @@ class Enemy(pygame.sprite.Sprite):
         if player is not None and player.vampirism > 0:
             heal = amount * player.vampirism
             player.hp = min(player.max_hp, player.hp + heal)
+        hit_sound = _get_hit_sound()
+        if hit_sound:
+            hit_sound.play()
         if self.hp > 0:
             return False
 
+        death_sound = _get_death_sound()
+        if death_sound:
+            death_sound.play()
         if player is not None:
             player.score += self.xp_value
         self._drop_loot(crystals_group, wave_manager)
@@ -269,6 +282,9 @@ class Enemy(pygame.sprite.Sprite):
                 damage = max(1, int(self.contact_damage * armor_mult))
                 player.hp -= damage
                 self.attack_timer = self.attack_cooldown
+                hurt_sound = _get_player_hurt_sound()
+                if hurt_sound and hurt_sound.get_num_channels() == 0:
+                    hurt_sound.play()
 
 
 def spawn_enemy(wave: int, player) -> Enemy:

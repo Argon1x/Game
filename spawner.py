@@ -1,11 +1,14 @@
 from enemies import spawn_enemy
-from settings import SPAWN_COOLDOWN_MS
 
 
 class Spawner:
     def __init__(self):
         self.spawn_timer = 0
-        self.spawn_cooldown = SPAWN_COOLDOWN_MS
+        self.spawn_cooldown = 0
+        self._last_wave = None
+
+    def _calc_cooldown(self, wave: int) -> int:
+        return max(300, 1200 - wave * 200)
 
     def update(self, enemies_group, wave_manager, player, tick=1):
         if wave_manager.in_pause:
@@ -17,6 +20,11 @@ class Spawner:
         total_spawned = wave_manager.enemies_killed + len(enemies_group)
         if total_spawned >= wave_manager.enemies_to_spawn:
             return
+
+        if self._last_wave != wave_manager.wave:
+            self._last_wave = wave_manager.wave
+            self.spawn_cooldown = self._calc_cooldown(wave_manager.wave)
+            self.spawn_timer = 0
 
         if self.spawn_timer > 0:
             self.spawn_timer -= tick

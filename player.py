@@ -41,10 +41,11 @@ class Player(pygame.sprite.Sprite):
         self.damage_multiplier = 1.0
         self.armor = 1.0
         self.vampirism = 0.0
-        self.regen = False
-        self.bullet_pierce = False
+        self.regen = 0
+        self.bullet_pierce = 0
         self.pickup_radius = PLAYER_PICKUP_RADIUS
         self.xp_multiplier = 1.0
+        self.xp_boost = 0
 
         self.weapons = [Knife()]
 
@@ -89,8 +90,8 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, tick):
         self.survival_time += tick
-        if self.regen and self.hp < self.max_hp:
-            self.hp = min(self.max_hp, self.hp + tick * PLAYER_REGEN_PER_MS)
+        if self.regen > 0 and self.hp < self.max_hp:
+            self.hp = min(self.max_hp, self.hp + tick * PLAYER_REGEN_PER_MS * self.regen)
         center = self.rect.center
         self.animator.update(tick)
         self.image = self.animator.image

@@ -1,5 +1,8 @@
+import os
 import pygame
 import sys
+
+os.environ["SDL_RENDER_SCALE_QUALITY"] = "1"
 from settings import *
 from states import GameState
 from player import Player
@@ -7,15 +10,25 @@ from spawner import Spawner
 from wave_manager import WaveManager
 from upgrades import UpgradeScreen
 from menu import Menu, create_buttons
-from asset_paths import SAND_TEXTURE
+from asset_paths import SAND_TEXTURE, SOUNDS
 from assets_loader import load_image
 from camera import Camera, draw_sprite_group, draw_tiled_world
 
 pygame.init()
+pygame.mixer.music.load(str(SOUNDS["music"]))
+pygame.mixer.music.set_volume(0.2)
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
 pygame.display.set_caption("Desert Survivor")
 clock = pygame.time.Clock()
+_fullscreen = False
+
+
+def toggle_fullscreen():
+    global screen, _fullscreen
+    _fullscreen = not _fullscreen
+    flags = pygame.SCALED | (pygame.FULLSCREEN if _fullscreen else 0)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
 
 _sand_texture = None
 
@@ -90,6 +103,7 @@ class Game:
         self.upgrade_screen = None
 
     def start_game(self):
+        pygame.mixer.music.play(-1)
         (
             self.player,
             self.player_group,
@@ -114,6 +128,7 @@ class Game:
             self.state = GameState.PAUSED
 
     def go_to_main_menu(self):
+        pygame.mixer.music.stop()
         self.reset_session()
         self.state = GameState.MAIN_MENU
 
@@ -125,6 +140,7 @@ class Game:
         return False
 
     def trigger_game_over(self):
+        pygame.mixer.music.stop()
         self.game_over_menu.set_subtitle(f"Счёт: {self.player.score}")
         self.state = GameState.GAME_OVER
 
@@ -135,6 +151,10 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.quit_game()
+                return
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                toggle_fullscreen()
                 return
 
             if self.state == GameState.MAIN_MENU:

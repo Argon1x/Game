@@ -2,6 +2,25 @@ from pathlib import Path
 
 import pygame
 
+_sound_cache: dict[str, pygame.mixer.Sound | None] = {}
+
+
+def load_sound(path: Path, volume: float = 1.0) -> pygame.mixer.Sound | None:
+    key = str(path)
+    if key in _sound_cache:
+        return _sound_cache[key]
+    if not path.exists():
+        _sound_cache[key] = None
+        return None
+    try:
+        sound = pygame.mixer.Sound(str(path))
+        sound.set_volume(volume)
+        _sound_cache[key] = sound
+        return sound
+    except Exception:
+        _sound_cache[key] = None
+        return None
+
 _cache: dict[tuple, pygame.Surface | None] = {}
 
 DIRECTIONS = ("down", "left", "right", "up")

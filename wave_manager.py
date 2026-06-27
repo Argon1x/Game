@@ -3,7 +3,7 @@ from settings import *
 def enemies_for_wave(wave: int) -> int:
     if wave == 1:
         return WAVE_1_ENEMIES
-    return min(WAVE_ENEMIES_BASE + wave * WAVE_ENEMIES_PER_LEVEL, WAVE_ENEMIES_MAX)
+    return min(wave * 10, WAVE_ENEMIES_MAX)
 
 
 class WaveManager:

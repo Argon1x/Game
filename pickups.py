@@ -1,8 +1,23 @@
 import pygame
 import math
 
-from asset_paths import XP_CRYSTAL
-from assets_loader import load_sprite
+from asset_paths import XP_CRYSTAL, SOUNDS
+from assets_loader import load_sprite, load_sound
+
+_pickup_sound = None
+_levelup_sound = None
+
+def _get_pickup_sound():
+    global _pickup_sound
+    if _pickup_sound is None:
+        _pickup_sound = load_sound(SOUNDS["pickup"], volume=0.3)
+    return _pickup_sound
+
+def _get_levelup_sound():
+    global _levelup_sound
+    if _levelup_sound is None:
+        _levelup_sound = load_sound(SOUNDS["levelup"], volume=0.6)
+    return _levelup_sound
 from settings import *
 
 _xp_sprite = None
@@ -70,14 +85,19 @@ class XPCristal(pygame.sprite.Sprite):
                 self.fy += (dy / distance) * 0.25
 
         if distance < player.size and self.collect_delay <= 0:
+            sound = _get_pickup_sound()
+            if sound:
+                sound.play()
             player.xp += int(self.value * player.xp_multiplier)
             if player.xp >= player.xp_to_next:
                 player.xp -= player.xp_to_next
                 player.level += 1
-                extra = player.level // 10
-                increase = 2 + extra
+                increase = 1 if player.level <= 2 else 2
                 player.xp_to_next += increase
                 player.level_up_pending = True
+                levelup_sound = _get_levelup_sound()
+                if levelup_sound:
+                    levelup_sound.play()
             self.kill()
 
         self.rect.center = (int(self.fx), int(self.fy))
